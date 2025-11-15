@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dream Interpreter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .moon-icon {
+            font-size: 1.2em;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea::placeholder {
+            color: #999;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 18px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .interpret-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .interpret-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .interpret-btn:active {
+            transform: translateY(0);
+        }
+
+        .interpret-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .clear-btn {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .clear-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .result-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-section.show {
+            display: block;
+        }
+
+        .result-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .interpretation {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            line-height: 1.8;
+            color: #444;
+            font-size: 1.05em;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .interpretation h3 {
+            color: #667eea;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .interpretation h3:first-child {
+            margin-top: 0;
+        }
+
+        .interpretation p {
+            margin-bottom: 15px;
+        }
+
+        .interpretation ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .interpretation li {
+            margin-bottom: 8px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .history-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .history-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .history-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        .history-item-date {
+            font-size: 0.85em;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .history-item-preview {
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .button-container {
+                flex-direction: column;
+            }
+
+            textarea {
+                min-height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Advertisement Banner -->
+    <script type="text/javascript">
+        atOptions = {
+            'key' : '5ed71b9c5eb9dd8df0ef651bad7ecdfc',
+            'format' : 'iframe',
+            'height' : 90,
+            'width' : 728,
+            'params' : {}
+        };
+    </script>
+    <script type="text/javascript" src="//www.highperformanceformat.com/5ed71b9c5eb9dd8df0ef651bad7ecdfc/invoke.js"></script>
+    
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span class="moon-icon">🌙</span>
+                Dream Interpreter
+                <span class="moon-icon">✨</span>
+            </h1>
+            <p>Unlock the secrets hidden in your dreams</p>
+        </div>
+
+        <div class="content">
+            <div class="input-section">
+                <label for="dreamInput">Describe your dream:</label>
+                <textarea 
+                    id="dreamInput" 
+                    placeholder="I was walking through a forest and saw a white owl flying above me. Then I found myself in my childhood home..."
+                ></textarea>
+            </div>
+
+            <div class="button-container">
+                <button class="interpret-btn" id="interpretBtn" onclick="interpretDream()">
+                    <span>🔮</span>
+                    Interpret Dream
+                </button>
+                <button class="clear-btn" onclick="clearAll()">
+                    <span>🗑️</span>
+                    Clear
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>Analyzing your dream...</p>
+            </div>
+
+            <div class="result-section" id="resultSection">
+                <div class="result-title">
+                    <span>💭</span>
+                    Your Dream Interpretation
+                </div>
+                <div class="interpretation" id="interpretation"></div>
+            </div>
+
+            <div class="history-section" id="historySection" style="display: none;">
+                <div class="history-title">📜 Recent Dreams</div>
+                <div id="historyList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dream symbol database
+        const dreamSymbols = {
+            water: {
+                meanings: ['emotions', 'subconscious', 'purification', 'life flow'],
+                interpretation: 'Water in dreams often represents your emotional state and the flow of feelings in your life.'
+            },
+            flying: {
+                meanings: ['freedom', 'ambition', 'perspective', 'escape'],
+                interpretation: 'Flying symbolizes freedom, rising above problems, and gaining new perspectives on life situations.'
+            },
+            falling: {
+                meanings: ['loss of control', 'anxiety', 'insecurity', 'fear'],
+                interpretation: 'Falling dreams typically reflect feelings of losing control or anxiety about a situation in your waking life.'
+            },
+            snake: {
+                meanings: ['transformation', 'hidden fears', 'healing', 'wisdom'],
+                interpretation: 'Snakes can represent transformation, hidden fears, or healing. Context matters greatly for interpretation.'
+            },
+            house: {
+                meanings: ['self', 'mind', 'security', 'family'],
+                interpretation: 'Houses often represent different aspects of yourself or your psyche. Different rooms may symbolize different parts of your personality.'
+            },
+            death: {
+                meanings: ['endings', 'transformation', 'new beginnings', 'change'],
+                interpretation: 'Death in dreams usually symbolizes the end of something and the beginning of something new, not literal death.'
+            },
+            car: {
+                meanings: ['life direction', 'control', 'journey', 'status'],
+                interpretation: 'Cars represent your drive and direction in life, and how much control you feel you have.'
+            },
+            baby: {
+                meanings: ['new beginnings', 'vulnerability', 'potential', 'innocence'],
+                interpretation: 'Babies often symbolize new projects, ideas, or aspects of yourself that need nurturing.'
+            },
+            teeth: {
+                meanings: ['power', 'confidence', 'appearance', 'communication'],
+                interpretation: 'Teeth falling out often relates to anxiety about appearance, communication, or feelings of powerlessness.'
+            },
+            fire: {
+                meanings: ['passion', 'anger', 'transformation', 'destruction'],
+                interpretation: 'Fire represents strong emotions, passion, anger, or transformative energy in your life.'
+            },
+            dog: {
+                meanings: ['loyalty', 'friendship', 'protection', 'instinct'],
+                interpretation: 'Dogs typically represent loyalty, friendship, protection, or your instinctual nature.'
+            },
+            cat: {
+                meanings: ['independence', 'intuition', 'femininity', 'mystery'],
+                interpretation: 'Cats often symbolize independence, feminine power, intuition, and mystery.'
+            },
+            forest: {
+                meanings: ['unknown', 'exploration', 'nature', 'unconscious'],
+                interpretation: 'Forests represent the unknown, exploration of your unconscious mind, or feeling lost.'
+            },
+            ocean: {
+                meanings: ['vastness', 'emotions', 'unconscious', 'mystery'],
+                interpretation: 'The ocean represents the vast unconscious mind and deep emotions.'
+            },
+            mountain: {
+                meanings: ['obstacles', 'goals', 'achievement', 'challenge'],
+                interpretation: 'Mountains symbolize obstacles to overcome, goals to achieve, or major life challenges.'
+            },
+            bird: {
+                meanings: ['freedom', 'spirituality', 'messages', 'transcendence'],
+                interpretation: 'Birds represent freedom, spiritual messages, and the ability to rise above earthly concerns.'
+            },
+            spider: {
+                meanings: ['creativity', 'feminine power', 'entrapment', 'patience'],
+                interpretation: 'Spiders can represent creativity, feeling trapped, or the intricate web of your life connections.'
+            },
+            mirror: {
+                meanings: ['self-reflection', 'truth', 'identity', 'vanity'],
+                interpretation: 'Mirrors symbolize self-reflection, how you see yourself, or facing truth.'
+            },
+            money: {
+                meanings: ['value', 'power', 'self-worth', 'success'],
+                interpretation: 'Money in dreams often relates to your sense of self-worth, power, or success.'
+            },
+            blood: {
+                meanings: ['life force', 'sacrifice', 'passion', 'loss'],
+                interpretation: 'Blood represents life energy, sacrifice, strong emotions, or fear of loss.'
+            },
+            door: {
+                meanings: ['opportunity', 'transition', 'choice', 'new beginning'],
+                interpretation: 'Doors symbolize opportunities, transitions, choices, or barriers in your life.'
+            },
+            school: {
+                meanings: ['learning', 'past', 'anxiety', 'social pressure'],
+                interpretation: 'School dreams often reflect feelings about learning, past experiences, or social anxiety.'
+            },
+            chase: {
+                meanings: ['avoidance', 'fear', 'anxiety', 'pursuit'],
+                interpretation: 'Being chased indicates you are avoiding something or running from an issue in waking life.'
+            },
+            naked: {
+                meanings: ['vulnerability', 'exposure', 'authenticity', 'shame'],
+                interpretation: 'Being naked in public represents feelings of vulnerability, exposure, or fear of being seen as you truly are.'
+            },
+            rain: {
+                meanings: ['cleansing', 'sadness', 'renewal', 'release'],
+                interpretation: 'Rain can symbolize emotional release, cleansing, renewal, or sadness.'
+            },
+            sun: {
+                meanings: ['clarity', 'energy', 'success', 'vitality'],
+                interpretation: 'The sun represents clarity, consciousness, vital energy, and success.'
+            },
+            moon: {
+                meanings: ['intuition', 'cycles', 'femininity', 'unconscious'],
+                interpretation: 'The moon symbolizes intuition, natural cycles, feminine energy, and the unconscious mind.'
+            },
+            bridge: {
+                meanings: ['transition', 'connection', 'change', 'passage'],
+                interpretation: 'Bridges represent transitions between different phases of life or connections between aspects of yourself.'
+            },
+            lost: {
+                meanings: ['confusion', 'direction', 'identity', 'uncertainty'],
+                interpretation: 'Being lost indicates confusion about your direction in life or uncertainty about decisions.'
+            },
+            exam: {
+                meanings: ['evaluation', 'pressure', 'self-judgment', 'preparation'],
+                interpretation: 'Exam dreams reflect feelings of being tested, judged, or unprepared in some area of life.'
+            }
+        };
+
+        // Emotional tone keywords
+        const emotions = {
+            positive: ['happy', 'joy', 'excited', 'peaceful', 'love', 'beautiful', 'bright', 'light', 'warm'],
+            negative: ['scary', 'afraid', 'sad', 'angry', 'dark', 'lost', 'trapped', 'falling', 'chase', 'death'],
+            neutral: ['walking', 'seeing', 'found', 'went', 'was', 'had']
+        };
+
+        function interpretDream() {
+            const dreamText = document.getElementById('dreamInput').value.trim();
+            
+            if (!dreamText) {
+                alert('Please describe your dream first!');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('resultSection').classList.remove('show');
+            document.getElementById('interpretBtn').disabled = true;
+
+            // Simulate processing time
+            setTimeout(() => {
+                const interpretation = analyzeDream(dreamText);
+                displayInterpretation(interpretation);
+                saveDreamHistory(dreamText, interpretation);
+                
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('resultSection').classList.add('show');
+                document.getElementById('interpretBtn').disabled = false;
+                
+                // Scroll to results
+                document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 2000);
+        }
+
+        function analyzeDream(dreamText) {
+            const lowerText = dreamText.toLowerCase();
+            const words = lowerText.split(/\W+/);
+            
+            // Find symbols in dream
+            const foundSymbols = [];
+            for (const [symbol, data] of Object.entries(dreamSymbols)) {
+                if (lowerText.includes(symbol)) {
+                    foundSymbols.push({ symbol, ...data });
+                }
+            }
+
+            // Detect emotional tone
+            let positiveCount = 0;
+            let negativeCount = 0;
+            
+            words.forEach(word => {
+                if (emotions.positive.includes(word)) positiveCount++;
+                if (emotions.negative.includes(word)) negativeCount++;
+            });
+
+            let emotionalTone = 'neutral';
+            if (positiveCount > negativeCount) emotionalTone = 'positive';
+            else if (negativeCount > positiveCount) emotionalTone = 'negative';
+
+            // Generate interpretation
+            return generateInterpretation(dreamText, foundSymbols, emotionalTone);
+        }
+
+        function generateInterpretation(dreamText, symbols, tone) {
+            let interpretation = '<h3>🎯 Overall Meaning</h3>';
+            
+            if (tone === 'positive') {
+                interpretation += '<p>Your dream carries a positive energy, suggesting growth, happiness, or favorable changes in your life. This is often a sign that you\'re in harmony with your current path.</p>';
+            } else if (tone === 'negative') {
+                interpretation += '<p>Your dream reflects some anxiety or challenges you may be facing. Remember, these dreams often help us process difficult emotions and can lead to personal growth.</p>';
+            } else {
+                interpretation += '<p>Your dream presents a balanced perspective on your current life situation, combining various elements that reflect your daily experiences and deeper thoughts.</p>';
+            }
+
+            if (symbols.length > 0) {
+                interpretation += '<h3>🔑 Key Symbols Found</h3><ul>';
+                symbols.slice(0, 5).forEach(symbolData => {
+                    interpretation += `<li><strong>${symbolData.symbol.charAt(0).toUpperCase() + symbolData.symbol.slice(1)}:</strong> ${symbolData.interpretation}</li>`;
+                });
+                interpretation += '</ul>';
+            } else {
+                interpretation += '<h3>🔑 General Interpretation</h3>';
+                interpretation += '<p>While specific symbols weren\'t identified, your dream reflects your subconscious processing daily experiences and emotions. Consider the feelings you experienced during the dream and any recurring themes.</p>';
+            }
+
+            interpretation += '<h3>💡 Reflection Questions</h3>';
+            interpretation += '<ul>';
+            interpretation += '<li>What emotions did you feel during this dream?</li>';
+            interpretation += '<li>Are there any current life situations that relate to the dream\'s themes?</li>';
+            interpretation += '<li>What aspect of the dream stood out most to you?</li>';
+            interpretation += '<li>Have you had similar dreams before?</li>';
+            interpretation += '</ul>';
+
+            interpretation += '<h3>🌟 Guidance</h3>';
+            if (tone === 'negative') {
+                interpretation += '<p>If this dream caused distress, consider journaling about your feelings or talking to someone you trust. Dreams often highlight areas where we need support or change.</p>';
+            } else {
+                interpretation += '<p>Pay attention to the insights this dream offers. Your subconscious mind is communicating important messages about your personal journey.</p>';
+            }
+
+            return interpretation;
+        }
+
+        function displayInterpretation(interpretation) {
+            document.getElementById('interpretation').innerHTML = interpretation;
+        }
+
+        function saveDreamHistory(dream, interpretation) {
+            const history = JSON.parse(localStorage.getItem('dreamHistory') || '[]');
+            const entry = {
+                date: new Date().toLocaleString(),
+                dream: dream,
+                interpretation: interpretation
+            };
+            history.unshift(entry);
+            if (history.length > 10) history.pop();
+            localStorage.setItem('dreamHistory', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('dreamHistory') || '[]');
+            const historySection = document.getElementById('historySection');
+            const historyList = document.getElementById('historyList');
+            
+            if (history.length > 0) {
+                historySection.style.display = 'block';
+                historyList.innerHTML = '';
+                history.forEach((entry, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    item.innerHTML = `
+                        <div class="history-item-date">${entry.date}</div>
+                        <div class="history-item-preview">${entry.dream}</div>
+                    `;
+                    item.onclick = () => loadDream(entry);
+                    historyList.appendChild(item);
+                });
+            } else {
+                historySection.style.display = 'none';
+            }
+        }
+
+        function loadDream(entry) {
+            document.getElementById('dreamInput').value = entry.dream;
+            document.getElementById('interpretation').innerHTML = entry.interpretation;
+            document.getElementById('resultSection').classList.add('show');
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function clearAll() {
+            document.getElementById('dreamInput').value = '';
+            document.getElementById('resultSection').classList.remove('show');
+        }
+
+        // Load history on page load
+        window.onload = function() {
+            loadHistory();
+        };
+
+        // Allow Enter + Shift to add new lines, but not submit
+        document.getElementById('dreamInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                interpretDream();
+            }
+        });
+    </script>
+</body>
+</html>
